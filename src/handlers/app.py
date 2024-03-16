@@ -1,3 +1,4 @@
+import csv
 from typing import Dict
 
 import gradio as gr
@@ -13,6 +14,7 @@ class GradioApp:
         self.current_resolver = None
         self.current_transcript = ""
         self.last_question = None  # Track the last question asked
+        self.last_response = None  # Track the last response received
 
     def process_video(self, url: str):
         yt_handler = YTHandler(url)
@@ -25,11 +27,20 @@ class GradioApp:
         self.last_question = message  # Update the last question
         combined_input = f"Context: {self.current_transcript}\nQuestion: {message}"
         response = self.current_resolver.query([{"content": combined_input, "role": "user"}])
-        return response[0], ""  # Return the response and an empty string to clear the message box
+        self.last_response = response[0]  # Update the last response
+        return response[0], ""
 
     def handle_feedback(self, feedback):
-        print(f"Feedback received for the last question '{self.last_question}': {feedback}")
-        # Implement your logic to process the feedback here, such as logging or storing it
+        # Here, you should implement saving feedback logic.
+        print(f"Feedback received for '{self.last_question}'-'{self.last_question}': {feedback}")
+
+        # Simulate saving feedback.
+        with open('feedback.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([self.last_question, self.last_response, feedback])
+
+        self.last_question = None  # Resetting last question after feedback.
+        self.last_response = None  # Resetting last response after feedback.
         return "Thank you for your feedback!"
 
     def build_ui(self):
@@ -50,10 +61,15 @@ class GradioApp:
                 resolver_dropdown.change(self.update_resolver, resolver_dropdown)
 
             with gr.Row():
-                msg = gr.Textbox(placeholder="Enter your question here...", container=False)
+                msg = gr.Textbox(placeholder="Enter your question here...", container=False, scale=12)
+                ask_button = gr.Button("Ask")
+
+
             with gr.Row():
                 chatbot_response = gr.Textbox(placeholder="Chatbot response will appear here", container=False,
                                               show_copy_button=True)
+            ask_button.click(self.chat_with_video, inputs=msg, outputs=[chatbot_response, msg])
+
             with gr.Row():
                 feedback_options = gr.Radio(choices=["Thumbs up 👍", "Thumbs down 👎"], label="Feedback on this response")
             with gr.Row():

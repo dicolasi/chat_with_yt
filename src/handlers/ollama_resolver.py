@@ -4,12 +4,14 @@ from typing import List, Dict
 
 
 class OllamaResolver(AIChatResolverBase):
-    RESOLVER_PREFIX = "ollama"
+    RESOLVER_PREFIX = "llama2"
 
     def query(self, messages: List[Dict[str, str]]) -> List[str]:
         response = completion(
             model=self.model,
             messages=messages,
-            api_base=self.base_api
+            api_base=self.base_api,
+            api_key="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"
+
         )
         return [x.message.content for x in response.choices]
