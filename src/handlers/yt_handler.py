@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 from youtube_transcript_api import YouTubeTranscriptApi
 import re

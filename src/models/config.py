@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from json import load
 from typing import Dict
 from pydantic import BaseModel, field_validator
