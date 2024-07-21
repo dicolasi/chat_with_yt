@@ -42,17 +42,22 @@ class GradioApp:
     def build_ui(self):
         with gr.Blocks() as app:
             with gr.Row():
-                gr.Markdown("<h1>YouTube Video Processor and Chat</h1>")
+                gr.Markdown("<h1> Video Processor and Chat</h1>")
+            with gr.Row():
+                nickname = gr.Textbox(label="Nickname", placeholder="Enter your nickname here...", scale=1)
+                work_status_dropdown = gr.Dropdown(["Student", "Staff"], label="Work Status", scale=1)
+                gender_dropdown = gr.Dropdown(["Male", "Female","Other"], label="Gender", scale=1)
             with gr.Row():
                 gr.Markdown("<h3>Enter a YouTube video URL and use the chatbox to ask questions about the video.</h3>")
             with gr.Row():
-                video_url = gr.Textbox(label="YouTube Video URL", placeholder="Enter YouTube URL here...")
+                video_url = gr.Textbox(label="YouTube Video URL", placeholder="Enter YouTube URL here...", scale=3)
                 process_button = gr.Button("Process Video")
                 process_output = gr.Text(label="Status")
+                resolver_dropdown = gr.Dropdown(list(self.resolvers.keys()), label="Choose AI Resolver",
+                                                interactive=True)
+                resolver_dropdown.change(self.update_resolver, resolver_dropdown)
             process_button.click(self.process_video, inputs=video_url, outputs=process_output)
 
-            resolver_dropdown = gr.Dropdown(list(self.resolvers.keys()), label="Choose AI Resolver")
-            resolver_dropdown.change(self.update_resolver, resolver_dropdown)
 
             msg = gr.Textbox(placeholder="Enter your question here...", container=False)
             ask_button = gr.Button("Ask")
@@ -67,12 +72,14 @@ class GradioApp:
             feedback_submit = gr.Button("Submit Feedback")
             feedback_message = gr.Textbox(label="Feedback Status", container=False)
 
+
             def submit_feedback_and_clear(feedback):
                 if not self.last_response or not feedback:
                     feedback_message = "Please select feedback and ensure there's a response to provide feedback on."
-                    return feedback_message, "", ""  # Ensure to clear both the response and the question
+                    return feedback_message, "", ""  # Ensure to clear both the response and the question textbox
                 feedback_result = self.handle_feedback(feedback)
-                feedback_options.value = ""  # Clear feedback selection
+                feedback_options.value = None  # Clear feedback selection
+
                 # Clear the chatbot response and the question textbox as feedback is submitted
                 return feedback_result, "", ""
 
